@@ -1,0 +1,67 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO</title>
+    <style>
+        html {
+            margin: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div>
+            <input type="text" placeholder="Enter your item" 
+                v-model="item" @keypress.enter="saveItem()"/>
+            <button @click="saveItem()">SAVE</button>
+        </div>
+        <div>
+            <ul>
+                <li v-for="(item, index) in items">
+                    {{item}}
+                    <a href="#" @click="editItem(index)">EDIT</a>
+                    <a href="#" @click="removeItem(index)">DELETE</a>
+                    <a href="#" @click="removeItemByValue(item)">DELETE BY VALUE</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                item: null,
+                items: [],
+                editIndex: null,
+            },
+            methods: {
+                saveItem(){
+                    if(!this.editIndex){
+                        //save
+                        this.items.push(this.item)
+                    }else{
+                        //update
+                        this.items[this.editIndex] = this.item
+                    }
+
+                    this.item = null
+                    this.editIndex = null
+                },
+                removeItem(index){
+                    this.items.splice(index, 1)
+                },
+                removeItemByValue(item){
+                   //TODO:: Implement this method
+                },
+                editItem(index){
+                    this.editIndex = index
+                    this.item = this.items[index]
+                },
+            },
+        })
+    </script>
+</body>
+</html>
