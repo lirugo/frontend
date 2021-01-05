@@ -2,37 +2,71 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TODO</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+   
     <style>
-        html {
-            margin: 1em;
+        .v-list-item {
+            border-bottom: 2px #e6e6ee solid;
         }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <div>
-            <input type="text" placeholder="Enter your item" v-model="item" @keypress.enter="saveItem()" />
-            <button @click="saveItem()">SAVE</button>
-        </div>
-        <div>
-            <ul>
-                <li v-for="(item, index) in items">
-                    {{item}}
-                    <a href="#" @click="editItem(index)">EDIT</a>
-                    <a href="#" @click="removeItem(index)">DELETE</a>
-                    <a href="#" @click="removeItemByValue(item)">DELETE BY VALUE</a>
-                </li>
-            </ul>
-        </div>
+        <v-app>
+            <v-main class="grey lighten-3">
+                <v-container>
+                    <v-row justify="center">
+                        <v-col cols="12" sm="8" md="6" lg="4">
+                            <v-text-field hide-details class="white"
+                                outlined type="text" placeholder="Enter your item" v-model="item" @keypress.enter="saveItem()" />
+                        </v-col>
+                    </v-row>
+                    <v-row justify="center">
+                        <v-col cols="12" sm="8" md="6" lg="4">
+                            <v-list class="py-0">
+                                <v-list-item v-for="(item, index) in items" :key="index">
+                                    <v-list-item-content>
+                                        {{item}}
+                                    </v-list-item-content>
+                                    <v-btn icon @click="editItem(index)"><v-icon>mdi-pencil</v-icon></v-btn>
+                                    <v-btn icon @click="removeItem(index)"><v-icon color="red">mdi-delete</v-icon></v-btn>
+                                    <v-btn icon @click="removeItemByValue(item)"><v-icon color="orange">mdi-delete-sweep</v-icon></v-btn>
+                                </v-list-item>
+                                <v-list-item v-if="items.length <= 0">
+                                    <v-list-item-content>
+                                        No content yet...
+                                    </v-list-item-content>
+                                </v-list-item>
+                            </v-list>
+                        </v-col>
+                    </v-row>
+                   
+                </v-container>
+            </v-main>
+        </v-app>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+    <!-- TODO -->
+    <!-- TODO:: Add popup notification -->
+    <!-- TODO:: Drag&Drop items -->
+    <!-- TODO:: Transition -->
+    <!-- TODO:: Item is a class with a [title,completed,created_at,updated_at] -->
+    <!-- TODO:: Use localStorage for saving data -->
+    <!-- TODO:: Websockets -->
+
     <script>
         var app = new Vue({
             el: '#app',
+            vuetify: new Vuetify(),
             data: {
                 item: null,
                 items: [],
@@ -40,16 +74,20 @@
             },
             methods: {
                 saveItem() {
-                    if (!this.editIndex) {
-                        //save
-                        this.items.push(this.item)
-                    } else {
-                        //update
-                        this.items[this.editIndex] = this.item
-                    }
+                    if(this.item !== null){
+                        if (this.editIndex || this.editIndex === 0) {
+                            //update
+                            this.items[this.editIndex] = this.item
+                        } else {
+                            //save
+                            this.items.push(this.item)
+                        }
 
-                    this.item = null
-                    this.editIndex = null
+                        this.item = null
+                        this.editIndex = null
+                    }else {
+                        //TODO:: Add popup notification
+                    }
                 },
                 removeItem(index) {
                     this.items.splice(index, 1)
@@ -59,7 +97,7 @@
                     this.items.forEach(el => item === el ? count++ : null)
 
                     for (let i = this.items.length - 1; i >= 0; i--) {
-                        if (this.items[i] === item && count > 1){
+                        if (this.items[i] === item && count > 1) {
                             this.removeItem(i)
                             count--
                         }
