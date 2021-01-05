@@ -1,4 +1,5 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +10,11 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app">
         <div>
-            <input type="text" placeholder="Enter your item" 
-                v-model="item" @keypress.enter="saveItem()"/>
+            <input type="text" placeholder="Enter your item" v-model="item" @keypress.enter="saveItem()" />
             <button @click="saveItem()">SAVE</button>
         </div>
         <div>
@@ -38,11 +39,11 @@
                 editIndex: null,
             },
             methods: {
-                saveItem(){
-                    if(!this.editIndex){
+                saveItem() {
+                    if (!this.editIndex) {
                         //save
                         this.items.push(this.item)
-                    }else{
+                    } else {
                         //update
                         this.items[this.editIndex] = this.item
                     }
@@ -50,13 +51,21 @@
                     this.item = null
                     this.editIndex = null
                 },
-                removeItem(index){
+                removeItem(index) {
                     this.items.splice(index, 1)
                 },
-                removeItemByValue(item){
-                   //TODO:: Implement this method
+                removeItemByValue(item) {
+                    let count = 0
+                    this.items.forEach(el => item === el ? count++ : null)
+
+                    for (let i = this.items.length - 1; i >= 0; i--) {
+                        if (this.items[i] === item && count > 1){
+                            this.removeItem(i)
+                            count--
+                        }
+                    }
                 },
-                editItem(index){
+                editItem(index) {
                     this.editIndex = index
                     this.item = this.items[index]
                 },
@@ -64,4 +73,5 @@
         })
     </script>
 </body>
+
 </html>
