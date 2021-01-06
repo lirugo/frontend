@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-   
+
     <style>
         .v-list-item {
             border-bottom: 2px #e6e6ee solid;
@@ -21,10 +21,15 @@
         <v-app>
             <v-main class="grey lighten-3">
                 <v-container>
+
+                    <v-snackbar :color="notification.color" bottom right v-model="notification.show">
+                        {{ notification.message }}
+                    </v-snackbar>
+
                     <v-row justify="center">
                         <v-col cols="12" sm="8" md="6" lg="4">
-                            <v-text-field hide-details class="white"
-                                outlined type="text" placeholder="Enter your item" v-model="item" @keypress.enter="saveItem()" />
+                            <v-text-field hide-details class="white" outlined type="text" placeholder="Enter your item"
+                                v-model="item" @keypress.enter="saveItem()" />
                         </v-col>
                     </v-row>
                     <v-row justify="center">
@@ -34,9 +39,15 @@
                                     <v-list-item-content>
                                         {{item}}
                                     </v-list-item-content>
-                                    <v-btn icon @click="editItem(index)"><v-icon>mdi-pencil</v-icon></v-btn>
-                                    <v-btn icon @click="removeItem(index)"><v-icon color="red">mdi-delete</v-icon></v-btn>
-                                    <v-btn icon @click="removeItemByValue(item)"><v-icon color="orange">mdi-delete-sweep</v-icon></v-btn>
+                                    <v-btn icon @click="editItem(index)">
+                                        <v-icon>mdi-pencil</v-icon>
+                                    </v-btn>
+                                    <v-btn icon @click="removeItem(index)">
+                                        <v-icon color="red">mdi-delete</v-icon>
+                                    </v-btn>
+                                    <v-btn icon @click="removeItemByValue(item)">
+                                        <v-icon color="orange">mdi-delete-sweep</v-icon>
+                                    </v-btn>
                                 </v-list-item>
                                 <v-list-item v-if="items.length <= 0">
                                     <v-list-item-content>
@@ -46,7 +57,7 @@
                             </v-list>
                         </v-col>
                     </v-row>
-                   
+
                 </v-container>
             </v-main>
         </v-app>
@@ -71,10 +82,15 @@
                 item: null,
                 items: [],
                 editIndex: null,
+                notification: {
+                    show: false,
+                    message: null,
+                    color: 'warning'
+                },
             },
             methods: {
                 saveItem() {
-                    if(this.item !== null){
+                    if (this.item !== null) {
                         if (this.editIndex || this.editIndex === 0) {
                             //update
                             this.items[this.editIndex] = this.item
@@ -85,12 +101,13 @@
 
                         this.item = null
                         this.editIndex = null
-                    }else {
-                        //TODO:: Add popup notification
+                    } else {
+                        this.showNotification('Item can`t be empty', 'warning')
                     }
                 },
                 removeItem(index) {
                     this.items.splice(index, 1)
+                    this.showNotification('Item was removed', 'success')
                 },
                 removeItemByValue(item) {
                     let count = 0
@@ -106,6 +123,11 @@
                 editItem(index) {
                     this.editIndex = index
                     this.item = this.items[index]
+                },
+                showNotification(message, color){
+                    this.notification.message = message
+                    this.notification.color = color
+                    this.notification.show = true
                 },
             },
         })
