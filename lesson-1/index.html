@@ -35,8 +35,10 @@
                     <v-row justify="center">
                         <v-col cols="12" sm="8" md="6" lg="4">
                             <v-list class="py-0">
+                                 <!-- :class="drag.startIndex === index ? 'indigo lighten-4' : ''" -->
                                 <v-list-item 
                                     draggable="true"
+                                    :class="itemColorClass(index)"
                                     @dragStart="dragStart($event, index)"
                                     @dragOver="dragOver($event, index)"
                                     @drop="drop($event, index)"
@@ -93,12 +95,23 @@
                     color: 'warning'
                 },
                 drag: {
+                    startItem: null,
                     startIndex: null,
                     overIndex: null,
                     dropIndex: null,
                 },
             },
             methods: {
+                itemColorClass(index){
+                    let color = ''
+                    
+                    if(this.drag.startIndex === index)
+                        color = 'indigo lighten-4'
+                    if(this.drag.overIndex === index)
+                        color = 'green lighten-4'
+
+                    return color
+                },
                 dragStart(event, index){
                     this.drag.startIndex = index
                 },
@@ -111,6 +124,9 @@
                     let startItem = this.items.splice(this.drag.startIndex, 1)[0]
                     this.items.splice(this.drag.dropIndex, 0, startItem)
                     
+                    this.drag.startIndex = null
+                    this.drag.overIndex = null
+                    this.drag.dropIndex = null
                     this.showNotification(`Item ${this.drag.startIndex+1} was be moved`, 'success')
                 },
                 saveItem() {
