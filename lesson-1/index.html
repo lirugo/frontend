@@ -35,7 +35,12 @@
                     <v-row justify="center">
                         <v-col cols="12" sm="8" md="6" lg="4">
                             <v-list class="py-0">
-                                <v-list-item v-for="(item, index) in items" :key="index">
+                                <v-list-item 
+                                    draggable="true"
+                                    @dragStart="dragStart($event, index)"
+                                    @dragOver="dragOver($event, index)"
+                                    @drop="drop($event, index)"
+                                    v-for="(item, index) in items" :key="index">
                                     <v-list-item-content>
                                         {{item}}
                                     </v-list-item-content>
@@ -80,15 +85,34 @@
             vuetify: new Vuetify(),
             data: {
                 item: null,
-                items: [],
+                items: [0,1,2,3,4],
                 editIndex: null,
                 notification: {
                     show: false,
                     message: null,
                     color: 'warning'
                 },
+                drag: {
+                    startIndex: null,
+                    overIndex: null,
+                    dropIndex: null,
+                },
             },
             methods: {
+                dragStart(event, index){
+                    this.drag.startIndex = index
+                },
+                dragOver(event, index){
+                    this.drag.overIndex = index
+                    event.preventDefault()
+                },
+                drop(event, index){
+                    this.drag.dropIndex = index
+                    let startItem = this.items.splice(this.drag.startIndex, 1)[0]
+                    this.items.splice(this.drag.dropIndex, 0, startItem)
+                    
+                    this.showNotification(`Item ${this.drag.startIndex+1} was be moved`, 'success')
+                },
                 saveItem() {
                     if (this.item !== null) {
                         if (this.editIndex || this.editIndex === 0) {
