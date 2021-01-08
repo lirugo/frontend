@@ -106,6 +106,11 @@
                 if(items)
                     this.items = JSON.parse(items)
             },
+            watch: {
+                items: (val) => {
+                    localStorage.setItem('items', JSON.stringify(val))
+                }
+            },
             methods: {
                 itemColorClass(index){
                     let color = ''
@@ -134,9 +139,6 @@
                     this.drag.dropIndex = null
                     this.showNotification(`Item ${this.drag.startIndex+1} was be moved`, 'success')
                 },
-                saveLocalStorage(){
-                    localStorage.setItem('items', JSON.stringify(this.items))
-                },
                 saveItem() {
                     if (this.item !== null) {
                         if (this.editIndex || this.editIndex === 0) {
@@ -146,9 +148,6 @@
                             //save
                             this.items.push(this.item)
                         }
-
-                        this.saveLocalStorage()
-                    
 
                         this.item = null
                         this.editIndex = null
