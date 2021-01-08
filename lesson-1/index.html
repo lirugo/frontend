@@ -34,17 +34,21 @@
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="12" sm="8" md="6" lg="4">
-                            <v-list class="py-0">
-                                 <!-- :class="drag.startIndex === index ? 'indigo lighten-4' : ''" -->
-                                <v-list-item 
-                                    draggable="true"
-                                    :class="itemColorClass(index)"
-                                    @dragStart="dragStart($event, index)"
-                                    @dragOver="dragOver($event, index)"
-                                    @drop="drop($event, index)"
-                                    v-for="(item, index) in items" :key="index">
+                            <v-list class="py-0" three-line>
+                                <!-- :class="drag.startIndex === index ? 'indigo lighten-4' : ''" -->
+                                <v-list-item draggable="true" :class="itemColorClass(index)"
+                                    @dragStart="dragStart($event, index)" @dragOver="dragOver($event, index)"
+                                    @drop="drop($event, index)" v-for="(item, index) in items" :key="index">
+                                    <v-list-item-avatar style="cursor: pointer;"
+                                        @click="itemCompleted(index)">
+                                        <v-icon color="success" large v-if="item.completed">mdi-check-decagram</v-icon>
+                                        <v-icon color="error" large v-else>mdi-close-outline</v-icon>
+                                    </v-list-item-avatar>
                                     <v-list-item-content>
-                                        {{item}}
+                                        <v-list-item-title>{{item.title}}</v-list-item-title>
+                                        <v-list-item-subtitle>Created at: {{item.created_at}}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>Updated at: {{item.updated_at}}</v-list-item-subtitle>
+                                        <v-list-item-subtitle v-if="item.completed">Completed at: {{item.completed_at}}</v-list-item-subtitle>
                                     </v-list-item-content>
                                     <v-btn icon @click="editItem(index)">
                                         <v-icon>mdi-pencil</v-icon>
@@ -79,9 +83,16 @@
     <!-- TODO:: Transition -->
     <!-- TODO:: Item is a class with a [title,completed,created_at,updated_at] -->
     <!-- TODO:: Use localStorage for saving data -->
-    <!-- TODO:: Websockets -->
 
     <script>
+        class Item {
+            title = null
+            completed = false
+            completed_at = null
+            created_at = new Date().toLocaleTimeString()
+            updated_at = new Date().toLocaleTimeString()
+        }
+
         var app = new Vue({
             el: '#app',
             vuetify: new Vuetify(),
@@ -101,52 +112,62 @@
                     dropIndex: null,
                 },
             },
-            created(){
+            created() {
                 let items = localStorage.getItem('items')
-                if(items)
+                if (items)
                     this.items = JSON.parse(items)
             },
             watch: {
-                items: (val) => {
-                    localStorage.setItem('items', JSON.stringify(val))
+                items: {
+                    deep: true,
+                    handler(val) {
+                        localStorage.setItem('items', JSON.stringify(val))
+                    }
                 }
             },
             methods: {
-                itemColorClass(index){
+                itemCompleted(index){
+                    this.items[index].completed = !this.items[index].completed
+                    this.items[index].completed_at = new Date().toLocaleTimeString()
+                },
+                itemColorClass(index) {
                     let color = ''
-                    
-                    if(this.drag.startIndex === index)
+
+                    if (this.drag.startIndex === index)
                         color = 'indigo lighten-4'
-                    if(this.drag.overIndex === index)
+                    if (this.drag.overIndex === index)
                         color = 'green lighten-4'
 
                     return color
                 },
-                dragStart(event, index){
+                dragStart(event, index) {
                     this.drag.startIndex = index
                 },
-                dragOver(event, index){
+                dragOver(event, index) {
                     this.drag.overIndex = index
                     event.preventDefault()
                 },
-                drop(event, index){
+                drop(event, index) {
                     this.drag.dropIndex = index
                     let startItem = this.items.splice(this.drag.startIndex, 1)[0]
                     this.items.splice(this.drag.dropIndex, 0, startItem)
-                    
+
                     this.drag.startIndex = null
                     this.drag.overIndex = null
                     this.drag.dropIndex = null
-                    this.showNotification(`Item ${this.drag.startIndex+1} was be moved`, 'success')
+                    this.showNotification(`Item ${this.drag.startIndex + 1} was be moved`, 'success')
                 },
                 saveItem() {
                     if (this.item !== null) {
                         if (this.editIndex || this.editIndex === 0) {
                             //update
-                            this.items[this.editIndex] = this.item
+                            this.items[this.editIndex].title = this.item
+                            this.items[this.editIndex].updated_at = new Date().toLocaleTimeString()
                         } else {
                             //save
-                            this.items.push(this.item)
+                            let item = new Item()
+                            item.title = this.item
+                            this.items.push(item)
                         }
 
                         this.item = null
@@ -161,10 +182,10 @@
                 },
                 removeItemByValue(item) {
                     let count = 0
-                    this.items.forEach(el => item === el ? count++ : null)
+                    this.items.forEach(el => item.title === el.title ? count++ : null)
 
                     for (let i = this.items.length - 1; i >= 0; i--) {
-                        if (this.items[i] === item && count > 1) {
+                        if (this.items[i].title === item.title && count > 1) {
                             this.removeItem(i)
                             count--
                         }
@@ -172,9 +193,9 @@
                 },
                 editItem(index) {
                     this.editIndex = index
-                    this.item = this.items[index]
+                    this.item = this.items[index].title
                 },
-                showNotification(message, color){
+                showNotification(message, color) {
                     this.notification.message = message
                     this.notification.color = color
                     this.notification.show = true
