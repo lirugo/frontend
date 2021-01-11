@@ -20,62 +20,29 @@
     <div id="app">
         <v-app>
             <v-main class="grey lighten-3">
-                <v-container>
+                <v-toolbar dense>
+                    <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-                    <v-snackbar :color="notification.color" bottom right v-model="notification.show">
-                        {{ notification.message }}
-                    </v-snackbar>
+                    <v-toolbar-title>TODO</v-toolbar-title>
 
-                    <v-row justify="center">
-                        <v-col cols="12" sm="8" md="6" lg="4">
-                            <v-text-field hide-details class="white" outlined type="text" placeholder="Enter your item"
-                                v-model="item" @keypress.enter="saveItem()" />
-                        </v-col>
-                    </v-row>
-                    <v-row justify="center">
-                        <v-col cols="12" sm="8" md="6" lg="4">
-                            <v-list class="py-0" three-line>
-                                <!-- :class="drag.startIndex === index ? 'indigo lighten-4' : ''" -->
-                                <v-list-item draggable="true" :class="itemColorClass(index)"
-                                    @dragStart="dragStart($event, index)" @dragOver="dragOver($event, index)"
-                                    @drop="drop($event, index)" v-for="(item, index) in items" :key="index">
-                                    <v-list-item-avatar style="cursor: pointer;"
-                                        @click="itemCompleted(index)">
-                                        <v-icon color="success" large v-if="item.completed">mdi-check-decagram</v-icon>
-                                        <v-icon color="error" large v-else>mdi-close-outline</v-icon>
-                                    </v-list-item-avatar>
-                                    <v-list-item-content>
-                                        <v-list-item-title>{{item.title}}</v-list-item-title>
-                                        <v-list-item-subtitle>Created at: {{item.created_at}}</v-list-item-subtitle>
-                                        <v-list-item-subtitle>Updated at: {{item.updated_at}}</v-list-item-subtitle>
-                                        <v-list-item-subtitle v-if="item.completed">Completed at: {{item.completed_at}}</v-list-item-subtitle>
-                                    </v-list-item-content>
-                                    <v-btn icon @click="editItem(index)">
-                                        <v-icon>mdi-pencil</v-icon>
-                                    </v-btn>
-                                    <v-btn icon @click="removeItem(index)">
-                                        <v-icon color="red">mdi-delete</v-icon>
-                                    </v-btn>
-                                    <v-btn icon @click="removeItemByValue(item)">
-                                        <v-icon color="orange">mdi-delete-sweep</v-icon>
-                                    </v-btn>
-                                </v-list-item>
-                                <v-list-item v-if="items.length <= 0">
-                                    <v-list-item-content>
-                                        No content yet...
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
-                        </v-col>
-                    </v-row>
+                    <v-spacer></v-spacer>
+                    <v-btn text to="/">Home</v-btn>
+                    <v-btn text to="/about">About</v-btn>
+                </v-toolbar>
 
-                </v-container>
+                <v-snackbar :color="notification.color" bottom right v-model="notification.show">
+                    {{ notification.message }}
+                </v-snackbar>
+
+                <router-view></router-view>
+
             </v-main>
         </v-app>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 
     <!-- TODO -->
     <!-- TODO:: Add popup notification -->
@@ -85,32 +52,35 @@
     <!-- TODO:: Use localStorage for saving data -->
 
     <script>
-        class Item {
-            title = null
-            completed = false
-            completed_at = null
-            created_at = new Date().toLocaleTimeString()
-            updated_at = new Date().toLocaleTimeString()
-        }
+        
+        const About = Vue.component('about', {
+            template: `
+                <v-container>
+                    <v-row justify="center">
+                        <v-card-title>About TODO list</v-card-title>
+                    </v-row>
+                </v-container>
+            `
+        })
 
-        var app = new Vue({
-            el: '#app',
-            vuetify: new Vuetify(),
-            data: {
-                item: null,
-                items: [],
-                editIndex: null,
-                notification: {
-                    show: false,
-                    message: null,
-                    color: 'warning'
-                },
-                drag: {
-                    startItem: null,
-                    startIndex: null,
-                    overIndex: null,
-                    dropIndex: null,
-                },
+        const TodoList = Vue.component('todo-list', {
+            data: () => {
+                return {
+                    item: null,
+                    items: [],
+                    editIndex: null,
+                    notification: {
+                        show: false,
+                        message: null,
+                        color: 'warning'
+                    },
+                    drag: {
+                        startItem: null,
+                        startIndex: null,
+                        overIndex: null,
+                        dropIndex: null,
+                    },
+                }
             },
             created() {
                 let items = localStorage.getItem('items')
@@ -126,7 +96,7 @@
                 }
             },
             methods: {
-                itemCompleted(index){
+                itemCompleted(index) {
                     this.items[index].completed = !this.items[index].completed
                     this.items[index].completed_at = new Date().toLocaleTimeString()
                 },
@@ -195,6 +165,89 @@
                     this.editIndex = index
                     this.item = this.items[index].title
                 },
+                showNotification(message, color) {
+                    this.notification.message = message
+                    this.notification.color = color
+                    this.notification.show = true
+                },
+            },
+            template: `
+            <v-container>
+                <v-row justify="center" class="mt-2">
+                    <v-col cols="12" sm="8" md="6" lg="4">
+                        <v-text-field hide-details class="white" outlined type="text" placeholder="Enter your item"
+                            v-model="item" @keypress.enter="saveItem()" />
+                    </v-col>
+                </v-row>
+
+                <v-row justify="center">
+                        <v-col cols="12" sm="8" md="6" lg="4">
+                            <v-list class="py-0" three-line>
+                                <v-list-item draggable="true" :class="itemColorClass(index)"
+                                    @dragStart="dragStart($event, index)" @dragOver="dragOver($event, index)"
+                                    @drop="drop($event, index)" v-for="(item, index) in items" :key="index">
+                                    <v-list-item-avatar style="cursor: pointer;"
+                                        @click="itemCompleted(index)">
+                                        <v-icon color="success" large v-if="item.completed">mdi-check-decagram</v-icon>
+                                        <v-icon color="error" large v-else>mdi-close-outline</v-icon>
+                                    </v-list-item-avatar>
+                                    <v-list-item-content>
+                                        <v-list-item-title>{{item.title}}</v-list-item-title>
+                                        <v-list-item-subtitle>Created at: {{item.created_at}}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>Updated at: {{item.updated_at}}</v-list-item-subtitle>
+                                        <v-list-item-subtitle v-if="item.completed">Completed at: {{item.completed_at}}</v-list-item-subtitle>
+                                    </v-list-item-content>
+                                    <v-btn icon @click="editItem(index)">
+                                        <v-icon>mdi-pencil</v-icon>
+                                    </v-btn>
+                                    <v-btn icon @click="removeItem(index)">
+                                        <v-icon color="red">mdi-delete</v-icon>
+                                    </v-btn>
+                                    <v-btn icon @click="removeItemByValue(item)">
+                                        <v-icon color="orange">mdi-delete-sweep</v-icon>
+                                    </v-btn>
+                                </v-list-item>
+                                <v-list-item v-if="items.length <= 0">
+                                    <v-list-item-content>
+                                        No content yet...
+                                    </v-list-item-content>
+                                </v-list-item>
+                            </v-list>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            `
+        })
+
+        class Item {
+            title = null
+            completed = false
+            completed_at = null
+            created_at = new Date().toLocaleTimeString()
+            updated_at = new Date().toLocaleTimeString()
+        }
+
+        const routes = [
+            { path: '/', component: TodoList },
+            { path: '/about', component: About}
+        ]
+
+        const router = new VueRouter({
+            routes
+        })
+
+        var app = new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            router,
+            data: {
+                notification: {
+                    show: false,
+                    message: null,
+                    color: 'warning'
+                },
+            },
+            methods: {
                 showNotification(message, color) {
                     this.notification.message = message
                     this.notification.color = color
